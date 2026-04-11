@@ -31,8 +31,9 @@ class network(object):
         tracking progress, but slows things down substantially."""
 
         #personal comment for future ref: The minibatch approach is mainly just for computational efficiency
-        #basically sending each image or image batch to a different gpu or different cpu core-->Not very efficient given computational 
-        #power for matrix mults and vector operations is much better GPU vs CPU
+        #basically sending each image or image batch to a different gpu or different cpu core
+        #-->Not very efficient given computational power for matrix mults
+        #and vector operations is much better GPU vs CPU
         #interesting read on https://d2l.ai/chapter_optimization/minibatch-sgd.html
 
         if test_data: ntest=len(test_data)
@@ -72,6 +73,39 @@ class network(object):
                        for b, nb in zip(self.biases, nabla_b)]
 
 
+    def backprop(self, x, y):
+        """Return a tuple ``(nabla_b, nabla_w)`` representing the
+        gradient for the cost function C_x.  ``nabla_b`` and
+        ``nabla_w`` are layer-by-layer lists of numpy arrays, similar
+        to ``self.biases`` and ``self.weights``."""
+        """Return a tuple ``(nabla_b, nabla_w)`` representing the
+        gradient for the cost function C_x.  ``nabla_b`` and
+        ``nabla_w`` are layer-by-layer lists of numpy arrays, similar
+        to ``self.biases`` and ``self.weights``."""
+        nabla_b = [np.zeros(b.shape) for b in self.biases]
+        nabla_w = [np.zeros(w.shape) for w in self.weights]
+        # feedforward of pred
+        activation = x
+        activations = [x] # list to store all the activations, layer by layer
+        zs = [] # list to store all the z vectors, layer by layer
+        for b, w in zip(self.biases, self.weights):
+            z = np.dot(w, activation)+b
+            zs.append(z)
+            activation = sigmoid(z)
+            activations.append(activation) #end forward pass
+        # backward pass
+        delta = self.cost_derivative(activations[-1], y) * \
+            deriv_sigmoid(zs[-1]) #difference between actual and predicted output per neuron(1o in last layer)
+    #For the output list of predictions(0-1) it shows how "confident" the network is that it is that specific output(number)
+        nabla_b[-1] = delta
+        nabla_w[-1] = np.dot(delta, activations[-2].transpose())
+        for l in range(2, self.num_layers): #iterating from the last layer to the first
+            z = zs[-l]
+            sp = deriv_sigmoid(z)
+            delta = np.dot(self.weights[-l+1].transpose(), delta) * sp #mostly for faster runtimes
+            nabla_b[-l] = delta 
+            nabla_w[-l] = np.dot(delta, activations[-l-1].transpose())
+        return (nabla_b, nabla_w)
 
 
 #sigmoid transformation for R-->[0,1]    

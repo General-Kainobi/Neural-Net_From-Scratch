@@ -7,7 +7,9 @@ import time
 
 class Network(object):
     def __init__(self, sizes):#sizes is a list containing the number of nuerons per layer
-        self.nlayers=len(sizes)
+        self.nlayers = len(sizes)
+        # compatibility alias used in some places
+        self.num_layers = len(sizes)
         self.sizes = sizes
         #inizializzo randomicamente sia i bias che i pesi per neuron
         self.biases = [np.random.randn(y, 1) for y in sizes[1:]] # skip first layer(input)
@@ -16,7 +18,7 @@ class Network(object):
     def feedforward(self, input):
         #Calculates the output of the network
         next=input
-        for bi, we in (self.biases, self.weights):
+        for bi, we in zip(self.biases, self.weights):
             next = sigmoid(np.dot(we,next)+bi) # maps the weighted passforward sum into [0,1]
         return next
     
@@ -128,4 +130,5 @@ def sigmoid(out):
 """
 #per la backpropagation
 def deriv_sigmoid(out):
-    sigmoid(out)*(1-sigmoid(out))
+    s = sigmoid(out)
+    return s * (1 - s)

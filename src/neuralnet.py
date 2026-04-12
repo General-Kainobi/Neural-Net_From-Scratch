@@ -72,16 +72,14 @@ class network(object):
         self.biases = [b-(eta/len(mini_batch))*nb
                        for b, nb in zip(self.biases, nabla_b)]
 
-
+#This function is the main actor in all this, it calculates the gradients(partial deriv matrix) to see where the min loss is
+#and then goes layer by layer to adjust weights based on contribution to next neuron activation
     def backprop(self, x, y):
         """Return a tuple ``(nabla_b, nabla_w)`` representing the
         gradient for the cost function C_x.  ``nabla_b`` and
         ``nabla_w`` are layer-by-layer lists of numpy arrays, similar
         to ``self.biases`` and ``self.weights``."""
-        """Return a tuple ``(nabla_b, nabla_w)`` representing the
-        gradient for the cost function C_x.  ``nabla_b`` and
-        ``nabla_w`` are layer-by-layer lists of numpy arrays, similar
-        to ``self.biases`` and ``self.weights``."""
+
         nabla_b = [np.zeros(b.shape) for b in self.biases]
         nabla_w = [np.zeros(w.shape) for w in self.weights]
         # feedforward of pred
@@ -108,10 +106,26 @@ class network(object):
         return (nabla_b, nabla_w)
 
 
-#sigmoid transformation for R-->[0,1]    
+    def evaluate(self, test_data):
+        """Return the number of test inputs for which the neural
+        network outputs the correct result."""
+        test_results = [(np.argmax(self.feedforward(x)), y) for (x, y) in test_data] # outputs prediction neuron vs actual in test
+        return sum(int(x == y) for (x, y) in test_results) # number of correct activations
+
+    def cost_derivative(self, output_activations, y):
+        """Return the vector of partial derivatives \partial C_x /
+        \partial a for the output activations."""
+        return (output_activations-y)
+
+
+#sigmoid transformation for R-->[0,1]
 def sigmoid(out):
     return 1.0/(1.0+np.exp(-out))
+"""Note: ReLU function is supposedly better and a more modern approach for neural nets as it has
+    a smoother and more constant gradient as opposed to a sigmoid function which tends to spike near 0 
+    and then flatten out. It is also faster to calculate and so more efficient for large neural networks.
 
+"""
 #per la backpropagation
 def deriv_sigmoid(out):
     sigmoid(out)*(1-sigmoid(out))

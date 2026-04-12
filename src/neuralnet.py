@@ -5,7 +5,7 @@ import time
 
 
 
-class network(object):
+class Network(object):
     def __init__(self, sizes):#sizes is a list containing the number of nuerons per layer
         self.nlayers=len(sizes)
         self.sizes = sizes
